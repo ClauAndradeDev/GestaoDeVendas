@@ -1,0 +1,197 @@
+﻿@page "/Produtos"
+
+@using Syncfusion.Blazor.Navigations;
+@using Syncfusion.Blazor.Inputs;
+@using Syncfusion.Blazor.Grids;
+@using Syncfusion.Blazor.Buttons;
+@using GestaoDeVendas.Dominio.Dados;
+@using GestaoDeVendas.Web.Services.Layout;
+
+
+@inject IProdutoService produtoService
+
+<h3>Produtos</h3>
+<div>
+    
+</div>
+@*
+<div id="header" style="height:45px;text-align: center;color:white;background-color:midnightblue;font-size:1.2rem;line-height:45px;">
+Header
+    </div>
+        <SfSidebar Width="250px">
+            <ChildContent>
+                <div style="text-align: center;" class="text-content"> Sidebar </div>
+            </ChildContent>
+        </SfSidebar>*@
+
+
+@*<div class="col-lg-12">
+    <EditForm Model="@SelecaoProduto">
+        <DataAnnotationsValidator />
+        <div style="padding-top: 20px;">
+            <div class="form-group col-md-6">
+                <SfNumericTextBox ID="ID" @bind-Value="@(SelecaoProduto.Id)" Enabled="@Check" FloatLabelType="FloatLabelType.Always" Placeholder="ID"></SfNumericTextBox>
+            </div>
+            <div class="form-group col-md-6">
+                <SfTextBox ID="Desccricao" @bind-Value="@SelecaoProduto.Descricao" Enabled="@Enabled" Placeholder="Descrição" FloatLabelType="FloatLabelType.Always"></SfTextBox>
+                <ValidationMessage style="color: #dc3545; height: 0px" For="@(() => SelecaoProduto.Descricao)" />
+            </div>
+            <div class="form-group col-md-6">
+                <SfNumericTextBox ID="Quantidade" TValue="int" @bind-Value="@SelecaoProduto.Quantidade" Enabled="@Enabled" Placeholder="Quantidade" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+                <ValidationMessage style="color: #dc3545; height:0px;" For="@(() => SelecaoProduto.Quantidade)" />
+            </div>
+            <div class="form-group col-md-6">
+                <SfNumericTextBox ID="Preco" TValue="decimal" @bind-Value="@SelecaoProduto.Preco" Enabled="@Enabled" Placeholder="Preco" FloatLabelType="FloatLabelType.Always"></SfNumericTextBox>
+                <ValidationMessage style="color: #dc3545; height:0px;" For="@(() => SelecaoProduto.Preco)" />
+            </div>
+
+        </div>
+    </EditForm>
+    <div class="temp">
+        <SfButton @onclick="Cancel" Disabled="@Disabled">Cancelar</SfButton>
+        <SfButton @onclick="Save" Disabled="@Disabled">Salvar</SfButton>
+    </div>
+</div>*@
+
+<SfGrid DataSource="@produtos" AllowPaging="true" @ref="Grid">
+    <GridEvents RowSelected="RowSelectHandler" RowDeselected="RowDeSelectHandler" TValue="Produto"></GridEvents>
+    <GridColumns>
+        <GridColumn IsPrimaryKey="true" Field=@nameof(Produto.Id) HeaderText="Id" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Produto.Descricao) HeaderText="Descrição" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(Produto.Quantidade) HeaderText="Qtde" TextAlign="TextAlign.Right" Width="130"></GridColumn>
+        <GridColumn Field=@nameof(Produto.Preco) Format="C" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+<SfSidebar @ref="rightSidebarInstance" Width="300px" Position=SidebarPosition.Right @bind-IsOpen="RightToggle">
+    <ChildContent>
+        <EditForm Model="@SelecaoProduto">
+            <div style="text-align: center;" class="text-content">
+                <span>Sidebar</span>
+                <div>
+                    <div class="form-group col-md-6">
+                        <SfNumericTextBox Placeholder='Id' Enabled="@Check" @bind-Value="@SelecaoProduto.Id" FloatLabelType='@FloatLabelType.Auto' ID="ID" Width="120px"></SfNumericTextBox>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <SfTextBox Placeholder='Descricao' Enabled="@Enabled" @bind-Value="@SelecaoProduto.Descricao" FloatLabelType='@FloatLabelType.Auto' ID="Descricao" Width="160px"></SfTextBox>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <SfNumericTextBox Placeholder="Quantidade" Enabled="@Enabled" @bind-Value="@SelecaoProduto.Quantidade" FloatLabelType="@FloatLabelType.Auto" ID="Quantidade" Width="120px"></SfNumericTextBox>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <SfNumericTextBox Placeholder="Preço" Enabled="@Enabled" @bind-Value="@SelecaoProduto.Preco" FloatLabelType="@FloatLabelType.Auto" ID="Preço" Width="120px"></SfNumericTextBox>
+                    </div>
+                </div>
+                <span>
+                    <SfButton @onclick="Cancel" Disabled="@Disabled">Cancelar</SfButton>
+                    <SfButton @onclick="Save" Disabled="@Disabled">Salvar</SfButton>
+                    <SfButton @onclick="Close" CssClass="e-btn close-btn">Fechar</SfButton>
+                </span>
+            </div>
+        </EditForm>
+    </ChildContent>
+</SfSidebar>
+
+
+@*<div class="text-content" style="text-align: center;">
+    <div>
+        <SfButton @onclick="Toggle" IsToggle="true" CssClass="e-btn e-info">Sidebar</SfButton>
+    </div>
+</div>*@
+
+@*    <div class="card-deck">
+        @foreach (var produto in produtos)
+        {
+            <div class="card-body">
+                <span class="card-text">@produto.Id</span>
+                <br />
+                <span class="card-text">@produto.Descricao</span>
+                <br/>
+                <span class="card-text">@produto.Preco</span>
+                <br />
+                <span class="card-text">@produto.Quantidade</span>
+            </div>
+    </div>*@
+
+@code {
+
+    public bool RightToggle = false;
+    SfSidebar rightSidebarInstance;
+
+    SfSidebar sidebarObj;
+    public bool SidebarToggle = false;
+
+    public void Close()
+    {
+        SidebarToggle = false;
+        RightToggle = false;
+    }
+
+    public void Open()
+    {
+        SidebarToggle = true;
+        RightToggle = true;
+    }
+    public void Toggle()
+    {
+        SidebarToggle = !SidebarToggle;
+    }
+
+
+    public string? MensagemErro { get; set; }
+    //private List<object> grids = new List<object> { "Search" };
+
+    [Parameter]
+    public IEnumerable<Produto>? produtos { get; set; }
+
+
+    private Boolean Check = false;
+    private Boolean Disabled = true;
+    private Boolean Enabled = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //SidebarToggle = false;
+            produtos = await produtoService.GetProdutos();
+        }
+        catch (Exception ex)
+        {
+            MensagemErro = ex.Message;
+        }
+    }
+
+    SfGrid<Produto> Grid;
+    public Produto SelecaoProduto = new Produto();
+
+    public void RowSelectHandler(RowSelectEventArgs<Produto> args)
+    {
+        SelecaoProduto = new Produto() { Id = args.Data.Id, Descricao = args.Data.Descricao, Preco = args.Data.Preco, Quantidade = args.Data.Quantidade };
+        this.Disabled = false;
+        this.Enabled = true;
+        Open();
+    }
+    public void RowDeSelectHandler(RowDeselectEventArgs<Produto> args)
+    {
+        Open();
+        SelecaoProduto = new Produto();
+        this.Disabled = true;
+        this.Enabled = false;
+    }
+    public async Task Save()
+    {
+        if ((SelecaoProduto.Id != null) && (SelecaoProduto.Descricao != string.Empty) && (SelecaoProduto.Preco != null) && (SelecaoProduto.Quantidade != null))
+        {
+            await this.Grid.SetRowDataAsync(SelecaoProduto.Id, SelecaoProduto);
+            await Cancel();
+        }
+    }
+    public async Task Cancel()
+    {
+        SelecaoProduto = new Produto() { };
+        await this.Grid.ClearSelectionAsync();
+    }
+
+}

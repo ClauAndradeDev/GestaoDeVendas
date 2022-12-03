@@ -1,0 +1,139 @@
+﻿@using GestaoDeVendas.Dominio.Dados;
+@using GestaoDeVendas.Web.Services.Layout;
+@using GestaoDeVendas.Web.Services.Service;
+@using Microsoft.AspNetCore.Authorization;
+
+
+@inject IUsuarioService UsuarioService
+@*@inject Utilities.ILocalStorage LocalStorage*@
+
+<div class="top-row px-4">
+    <div>
+        @if (@userNome != null)
+        {
+            <span>Olá,  @userNome!</span>
+        }
+    </div>
+    <div style="width:70px;text-align:right;">
+        @if (loggedIn)
+        {
+            @*<a class="btn btn-sm btn-primary text-white" title="Account" href="account"><span class="oi oi-key"></span></a>*@
+            <button class="btn btn-sm btn-danger" title="Logout" @onclick="Logout"><span class="oi oi-account-logout">&nbsp;Logout</span></button>
+        }
+        else
+        {
+            <button class="btn btn-sm btn-success" title="Login" @onclick="OpenLogin"><span class="oi oi-account-login">&nbsp;Login</span></button>
+        }
+    </div>
+</div>
+
+
+<div class="modal-backdrop fade @(show ? "show" : "") @(display ? "d-block" : "d-none")"></div>
+
+<div class="modal fade @(show ? "show" : "")  @(display ? "d-block" : "d-none")" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Login Form</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="loginEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com" autocomplete="off" required @bind-value="userNome" />
+                </div>
+                <div class="mb-3">
+                    <label for="loginPassword" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" required @bind-value="userSenha" />
+                </div>
+                <div class="mb-3">
+                    <span>@Mensagem</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" @onclick="Login">Login</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private bool show, display, loggedIn;
+    public string? userNome;
+    private string? userSenha;
+    private string? Mensagem;
+    [Parameter]
+    public Usuario? usuarios { get; set; }
+
+    public string? GetUserName()
+    {
+        return loggedIn ? userNome : null;
+    }
+
+    public async Task OpenLogin()
+    {
+        display = true;
+        await Task.Delay(100);
+        show = true;
+    }
+
+    [Authorize]
+    public async Task Logout()
+    {
+        userNome = null;
+        loggedIn = false;
+        //await LocalStorage.RemoveAsync("userNome");
+    }
+
+    private async Task Close()
+    {
+        show = false;
+        await Task.Delay(500);
+        display = false;
+    }
+
+    private async Task Login()
+    {
+        if (!string.IsNullOrEmpty(userNome))
+        {
+
+            //faço busca na tabela de usuários, e retorno o usuário localizado
+            var usuario = await UsuarioService.GetNomeUsuario(userNome);
+            if (usuario != null)
+            {
+                if ((usuario.NomeUsuario == userNome) && (usuario.Senha == userSenha))
+                {
+                    await Close();
+                    loggedIn = true;
+
+                    //salvo no localstorage
+                    //await LocalStorage.SaveStringAsync("userNome", userNome);
+                }
+                else
+                {
+                    Mensagem = "Usuário ou senha inválidos!";
+
+                }
+            }
+            else
+            {
+                Mensagem = "Usuário não localizado";
+            }
+
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        //userNome = await LocalStorage.GetStringAsync("userNome");
+        loggedIn = !string.IsNullOrEmpty(userNome);
+    }
+
+}
+

@@ -1,0 +1,110 @@
+﻿@page "/login"
+@using GestaoDeVendas.Dominio.Dados;
+@using GestaoDeVendas.Web.Services.Layout;
+@using Microsoft.AspNetCore.Authorization;
+
+@inject Utilities.ILocalStorage LocalStorage
+@inject IUsuarioService usuarioService
+
+<div class="container col-6">
+
+    @if (Mensagem != null)
+    {
+                //exibe
+        <h5>@Mensagem</h5>
+    }
+
+    <section>
+        <h1>Autenticação</h1>
+        <form action="/" method="post">
+            <input type="text"name="email" value=""placeholder="Username/e-mail"/>
+            <input type="text" name="senha" value="" placeholder="Senha"/>
+            <button type="button" class="btn btn-primary">Logar</button>
+        </form>
+    </section>
+   @* <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Login</h5>
+            <Form id="usuarios" OnValidSubmit="FazerLogin">
+                
+
+                <div class="form-group">
+                    <label> E-mail </label>
+                    <Input class="form-control" @bind="usuarios.NomeUsuario" />
+                    <ValidationMessage For="@(()=> usuarios.NomeUsuario)" />
+                </div>
+
+                <div class="form-group">
+                    <label> Senha </label>
+                    <Input type="password" class="form-control" @bind="usuarios.Senha" />
+                    <ValidationMessage For="@(()=> usuarios.Senha)" />
+                </div>
+                <div class="form-group">
+                    <label></label>
+                </div>
+                <br />
+                <button type="submit" class="btn btn-outline-primary btn-sm">Logar</button>
+
+            </Form>
+        </div>
+    </div>*@
+</div>
+
+@code {
+    [Parameter]
+    public Usuario? usuarios { get; set; }
+    private bool show, display, loggedIn;
+    private string? Mensagem = null;
+    private string? nomeUsuario;
+    private string? senhaUsuario;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        usuarios = new Usuario();
+        nomeUsuario = await LocalStorage.GetStringAsync("userNome");
+        loggedIn = !string.IsNullOrEmpty(nomeUsuario);
+    }
+
+    //public async Task FazerLogin()
+    //{
+    //    nomeUsuario = usuarios.NomeUsuario;
+    //    senhaUsuario = usuarios.Senha;
+
+    //    if ((!string.IsNullOrEmpty(nomeUsuario)) && (!string.IsNullOrEmpty(senhaUsuario)))
+    //    {
+    //        var usuario = await usuarioService.GetNomeUsuario(nomeUsuario);
+    //        if (usuario != null)
+    //        {
+    //            if ((usuario.NomeUsuario == nomeUsuario) && (usuario.Senha == senhaUsuario))
+    //            {
+    //                Mensagem = "Usuario logado";
+
+    //            }
+    //            else
+    //            {
+    //                Mensagem = "Usuário ou senha inválidos!";
+    //            }
+    //        }
+    //        else
+    //        {
+    //            Mensagem = "Usuário não localizado";
+    //        }
+    //    }
+    //}
+
+    //public void CarregarMensagem()
+    //{
+    //    if(Mensagem != null)
+    //    {
+    //        Mensagem;
+    //    }
+    //}
+
+    //[Authorize]
+    //public async Task Logout()
+    //{
+
+    //}
+}

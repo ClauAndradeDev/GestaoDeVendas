@@ -1,0 +1,147 @@
+﻿@page "/Usuarios"
+
+@using Syncfusion.Blazor.Navigations;
+@using Syncfusion.Blazor.Inputs;
+@using Syncfusion.Blazor.Grids;
+@using Syncfusion.Blazor.Buttons;
+@using Syncfusion.Blazor.Data;
+@using GestaoDeVendas.Dominio.Dados;
+@using GestaoDeVendas.Web.Services.Layout;
+
+
+@inject IUsuarioService usuarioService
+
+<h3>Produtos</h3>
+
+
+<SfGrid DataSource="@usuarios" AllowPaging="true" @ref="Grid">
+    <GridEvents RowSelected="RowSelectHandler" RowDeselected="RowDeSelectHandler" TValue="Usuario"></GridEvents>
+    <GridColumns>
+        <GridColumn IsPrimaryKey="true" Field=@nameof(Usuario.Id) HeaderText="Id" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Usuario.NomeUsuario) HeaderText="Nome Usuario" Width="150"></GridColumn>
+       @* <GridColumn Field=@nameof(Usuario.Senha) HeaderText="Senha"  TextAlign="TextAlign.Right" Width="130">
+        </GridColumn>
+        <GridColumn DisableHtmlEncode="true" Field=@nameof(Usuario.ConfirmaSenha) HeaderText="ConfirmaSenha" TextAlign="TextAlign.Right" Width="130"></GridColumn>*@
+    </GridColumns>
+</SfGrid>
+
+<SfSidebar @ref="rightSidebarInstance" Width="300px" Position=SidebarPosition.Right @bind-IsOpen="RightToggle">
+    <ChildContent>
+        <EditForm Model="@SelecaoUsuario">
+            <div style="text-align: center;" class="text-content">
+                <span>Sidebar</span>
+                <div>
+                    <div class="form-group col-md-6">
+                        <SfNumericTextBox Placeholder='Id' Enabled="@Check" @bind-Value="@SelecaoUsuario.Id" FloatLabelType='@FloatLabelType.Auto' ID="ID" Width="120px"></SfNumericTextBox>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <SfTextBox Placeholder='Nome Usuario' Enabled="@Enabled" @bind-Value="@SelecaoUsuario.NomeUsuario" FloatLabelType='@FloatLabelType.Auto' ID="NomeUsuario" Width="160px"></SfTextBox>
+                    </div>
+                   @* <div class="form-group col-md-6">
+                        <SfTextBox Placeholder="Senha" Enabled="@Enabled" @bind-Value="@SelecaoUsuario.Senha" FloatLabelType="@FloatLabelType.Auto" ID="Senha" Width="120px"></SfTextBox>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <SfTextBox Placeholder="Confirma Senha" Enabled="@Enabled" @bind-Value="@SelecaoUsuario.ConfirmaSenha" FloatLabelType="@FloatLabelType.Auto" ID="ConfirmaSenha" Width="120px"></SfTextBox>
+                    </div>*@
+                </div>
+                <span>
+                    <SfButton @onclick="Cancel" Disabled="@Disabled">Cancelar</SfButton>
+                    <SfButton @onclick="Save" Disabled="@Disabled">Salvar</SfButton>
+                    <SfButton @onclick="Close" CssClass="e-btn close-btn">Fechar</SfButton>
+                </span>
+            </div>
+        </EditForm>
+    </ChildContent>
+</SfSidebar>
+
+
+@code {
+
+    public bool RightToggle = false;
+    SfSidebar rightSidebarInstance;
+
+    SfSidebar sidebarObj;
+    public bool SidebarToggle = false;
+
+    public void Close()
+    {
+        SidebarToggle = false;
+        RightToggle = false;
+    }
+
+    public void Open()
+    {
+        SidebarToggle = true;
+        RightToggle = true;
+    }
+    public void Toggle()
+    {
+        SidebarToggle = !SidebarToggle;
+    }
+
+
+    public string? MensagemErro { get; set; }
+    //private List<object> grids = new List<object> { "Search" };
+
+    [Parameter]
+    public IEnumerable<Usuario>? usuarios { get; set; }
+
+
+    private Boolean Check = false;
+    private Boolean Disabled = true;
+    private Boolean Enabled = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //SidebarToggle = false;
+            usuarios = await usuarioService.GetUsuarios();
+        }
+        catch (Exception ex)
+        {
+            MensagemErro = ex.Message;
+        }
+    }
+
+    SfGrid<Usuario> Grid;
+    public Usuario SelecaoUsuario = new Usuario();
+
+    public void RowSelectHandler(RowSelectEventArgs<Usuario> args)
+    {
+        SelecaoUsuario = new Usuario() { Id = args.Data.Id, NomeUsuario = args.Data.NomeUsuario, Senha = args.Data.Senha, ConfirmaSenha = args.Data.ConfirmaSenha };
+        this.Disabled = false;
+        this.Enabled = true;
+        Open();
+    }
+    public void RowDeSelectHandler(RowDeselectEventArgs<Usuario> args)
+    {
+
+        SelecaoUsuario = new Usuario();
+        this.Disabled = true;
+        this.Enabled = false;
+        Open();
+    }
+    public async Task Save()
+    {
+        if ((SelecaoUsuario.Id != null) && (SelecaoUsuario.NomeUsuario != string.Empty))
+        {
+            //if (SelecaoUsuario.Senha == SelecaoUsuario.ConfirmaSenha)
+            //{
+                await this.Grid.SetRowDataAsync(SelecaoUsuario.Id, SelecaoUsuario);
+                await Cancel();
+            //}
+            //else
+            //{
+            //    MensagemErro = "Senha e Confirmação não são iguais";
+            //}
+        }
+    }
+    public async Task Cancel()
+    {
+        SelecaoUsuario = new Usuario() { };
+        await this.Grid.ClearSelectionAsync();
+    }
+
+}

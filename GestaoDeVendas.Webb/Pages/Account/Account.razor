@@ -1,0 +1,27 @@
+﻿@page "/account"
+
+<PageTitle>Account</PageTitle>
+
+@if (!string.IsNullOrEmpty(telaLogin.GetUserName()))
+{
+	<h3 class="my-4">Sua Conta</h3>
+
+	<p>@telaLogin.GetUserName()</p>
+
+	<button type="button" class="btn btn-danger" @onclick="telaLogin.Logout">Logout</button>
+}
+else
+{
+	<h3 class="my-4">Fazer login</h3>
+
+	<button type="button" class="btn btn-success" @onclick="telaLogin.OpenLogin">Login</button>
+}
+@code {
+	[CascadingParameter]
+	public TelaLogin telaLogin { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+	}
+}
